@@ -171,5 +171,4 @@ contract OrderBookTest is Test {
 
         assertEq(orderBook.transactionCount(), 0);
     }
-
 }

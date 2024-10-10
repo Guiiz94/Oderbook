@@ -172,4 +172,35 @@ contract OrderBookTest is Test {
         assertEq(orderBook.transactionCount(), 0);
     }
 
+    function testGetTransaction() public {
+        vm.startPrank(alice);
+        uint256 orderId = orderBook.placeOrder(100, 1, false);
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        tokenB.approve(address(orderBook), 50);
+        orderBook.fillOrder(orderId, 50);
+        vm.stopPrank();
+
+        OrderBook.Transaction memory txn = orderBook.getTransaction(0);
+
+        assertEq(txn.maker, alice); 
+        assertEq(txn.taker, bob);   
+        assertEq(txn.amount, 50);   
+        assertEq(txn.price, 1);     
+        assertEq(txn.isBuyOrder, false);
+        assertGt(txn.timestamp, 0); 
+    }
+
+    function testGetTransactionFailed() public {
+        // Tente de récupérer une transaction qui n'existe pas
+        OrderBook.Transaction memory txn = orderBook.getTransaction(9999);
+
+        assertEq(txn.maker, address(0));  
+        assertEq(txn.taker, address(0));  
+        assertEq(txn.amount, 0);          
+        assertEq(txn.price, 0);           
+        assertEq(txn.isBuyOrder, false);  
+        assertEq(txn.timestamp, 0);       
+    }
 }
